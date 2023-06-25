@@ -1,0 +1,297 @@
+{{/* layouts/_default/search.html */}}
+{{ define "main" }}
+
+<script>
+
+  document.getElementById("ipt").value=q
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    {{- if eq .Site.Params.colorScheme "light" }}
+    if ((storageColorScheme == 'Auto' && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+    {{- else if eq .Site.Params.colorScheme "dark" }}
+    if ((storageColorScheme == 'Auto' && window.matchMedia("(prefers-color-scheme: light)").matches) || storageColorScheme == "Light") {
+        document.getElementsByTagName('html')[0].classList.remove('dark')
+    }
+    {{- else }}
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+    {{- end }}
+</script>
+<br/>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+
+
+
+            <div class="search-container relative pt-4 md:pt-0">
+                <div class="search">
+                    <form role="search" class="search-form" action="" method="get" style="width: 100%;">
+                    <label>
+                        <input name="q" type="text" placeholder="{{i18n "search"}}" class="search-field" style="width: 100%;;background-color:#e7e7e7;">
+                    </label>
+
+                    </form>
+                </div>
+
+
+            {{- if .IsTranslated }}
+            {{- end }}
+        </div>
+ 
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+<style type="text/css">
+  .search-container {
+  margin-top: -0.3rem;
+  width: 100%;
+}
+.search-container .search {
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+.search-container input {
+  padding-left: 1rem;
+  line-height: 2rem;
+  outline: none;
+  background: transparent;
+}
+.search-container button {
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+  color: #e2e8f0;
+}
+</style>
+</nav>
+<script>
+    let element = document.getElementById('lightDarkMode')
+    {{- if eq .Site.Params.colorScheme "light" }}
+    if (storageColorScheme == 'Auto') {
+        element.firstElementChild.classList.remove('fa-sun')
+        element.firstElementChild.setAttribute("data-icon", 'adjust')
+        element.firstElementChild.classList.add('fa-adjust')
+        document.addEventListener('DOMContentLoaded', () => {
+            switchMode('Auto')
+        })
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-sun')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+    {{- else if eq .Site.Params.colorScheme "dark" }}
+    if (storageColorScheme == 'Auto') {
+        element.firstElementChild.classList.remove('fa-moon')
+        element.firstElementChild.setAttribute("data-icon", 'adjust')
+        element.firstElementChild.classList.add('fa-adjust')
+        document.addEventListener('DOMContentLoaded', () => {
+            switchMode('Auto')
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-moon')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    }
+    {{- else }}
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            switchMode('Auto')
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+    {{- end }}
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+        {{- if .IsTranslated }}
+        switchLanguage()
+        {{- end }}
+    });
+</script>
+
+
+
+<div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+  <article class="mx-6 my-8">
+      <h1 id="search-count" class="font-bold text-3xl text-primary-text"></h1>
+  </article>
+  <div id="search-result" class="bg-secondary-bg rounded overflow-hidden px-4 divide-y"> 
+    
+  </div> 
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.0/fuse.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const qs = new URLSearchParams(location.search);
+    const searchResult = document.querySelector('#search-result');
+    const searchCount = document.querySelector('#search-count');
+
+    const fuseOptions = {
+      findAllMatches: true,
+      shouldSort: true,
+      includeMatches: true,
+      threshold: 0.0,
+      tokenize: true,
+      location: 0,
+      distance: 100,
+      maxPatternLength: 32,
+      minMatchCharLength: 1,
+      keys: [{
+          name: "title",
+          weight: 0.9
+        },
+        {
+          name: "summary",
+          weight: 1.0
+        },
+        {
+          name: "tags",
+          weight: 0.4
+        },
+        {
+          name: "date",
+          weight: 0.4
+        },
+      ]
+    };
+
+    let fuse = null
+
+    async function getFuse() {
+      if (fuse == null) {
+        const resp = await fetch('../index.json', {
+          method: 'get'
+        })
+        const indexData = await resp.json()
+        fuse = new Fuse(indexData, fuseOptions);
+      }
+      return fuse
+    }
+
+    function render(items) {
+      console.log(items);
+      return items.map(item => {
+        item = item.item
+        return `
+<div class="px-2 py-6">
+  <div class="flex flex-col-reverse lg:flex-row justify-between">
+    <div class="w-full lg:w-2/3">
+      <div class="my-2">
+        <div class="mb-4">
+          <a href="${item.permalink}" class="font-bold text-xl hover:text-eureka">${item.title}</a>
+        </div>
+        <div class="content">
+          ${item.summary}
+          <p class="more">
+            <a href="${item.permalink}" title="${item.title}">阅读全文<span class="meta-nav">→</span></a>
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-wrap flex-row items-center my-2 text-tertiary-text">
+        <div class="mr-6 my-2">
+          <i class="fas fa-calendar mr-1"></i>
+          <span>${item.date}</span>
+        </div>
+        <div class="mr-6 my-2">
+
+        </div>
+
+      </div>  
+    </div>
+    <div class="w-full lg:w-1/3 mb-4 lg:mb-0 lg:ml-8">
+      ${item.featuredImage ? `<img src="${item.featuredImage}" class="w-full" alt="Featured Image">` : ''}
+    </div>
+  </div>
+</div>`;
+      }).join('');
+    }
+function waitL()
+{
+          if (isLd) {
+          oldd();
+          return;
+        }
+        requestAnimationFrame(waitL)
+}
+
+    function updateDOM(html, keyword, number) {
+      searchResult.innerHTML = html
+      searchCount.innerHTML = `{{i18n "AHowManyArts"}} ${number} {{i18n "BHowManyArts"}}`
+      if(number==0){
+        waitL();
+      }
+    }
+
+    async function search(searchString) {
+      console.log(searchString);
+      let result = [];
+      if(searchString) {
+        const fuse = await getFuse()
+        result = fuse.search(searchString)
+      }
+      const html = render(result)
+      updateDOM(html, searchString, result.length)
+    }
+
+    document.querySelectorAll('input[name="q"]').forEach(el => el.value = qs.get('q'));
+    search(qs.get('q') || '')
+
+    window.blogSearch = function(keyword) {
+      if(!keyword) {
+        return;
+      }
+
+      history.pushState('', '', location.pathname + '?q=' + encodeURIComponent(keyword));
+      document.querySelectorAll('input[name="q"]').forEach(el => el.value = keyword);
+      search(keyword);
+    }
+  })
+</script>
+<!-- <script type="text/javascript">
+  // 获取 URL 中的参数 q 的值
+  const urlParams = new URLSearchParams(window.location.search);
+  const q = urlParams.get('q');
+   var text,regex,hlt,i
+do{
+
+   text[i] = document.getElementsByClassName("content")[i].innerHTML;
+   regex[i] = new RegExp(q,"g");
+   hlt[i] = text.replace(regex,"<span class='highlight'>$&</span>")
+   document.getElementById("text").innerHTML =hlt[i]
+     i++
+   }
+   while(text[i]!='')
+
+  </script> -->
+
+
+  <style>
+    .highlight {
+      background-color: yellow;
+    }
+  </style>
+  <script type="text/javascript">
+    var isLd = false
+    function ldok()
+    {
+      isLd = true
+    }
+          function oldd()
+    {
+        document.getElementById("imm").innerHTML='<style type="text/css">#im{animation:jumpup 2.5s ease 1s;-webkit-animation:jumpup 1s; /* Safari and Chrome */}@keyframes jumpup{from{position: relative;left: 50%;top: 50%;transform: translate(-50%,40%);}to{position: relative;left: 50%;top: 50%;transform: translate(-50%,10%);}}@-webkit-keyframes jumpup{from{position: relative;left: 50%;top: 50%;transform: translate(-50%,40%);}to{position: relative;left: 50%;top: 50%;transform: translate(-50%,10%);}}</style>';
+        document.getElementById("im").removeAttribute("hidden")
+
+    }
+  </script>
+          <span id="imm"></span>
+          <img src="https://smileguide.github.io/images/senna_ikeda.webp" style="border-radius: 20px;height:300px;position: relative;left: 50%;top: 50%;transform: translate(-50%,10%);" id="im" onload="ldok()" hidden="hidden"></img>
+{{ end }}

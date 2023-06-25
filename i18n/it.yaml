@@ -1,0 +1,35 @@
+readMore:
+  other: Rareadmu makye
+readingTime:
+  other: '{{ .Count }}min rareadmuk hanashi'
+toc:
+  other: racomtentmutu
+seriesOfPosts:
+  other: rapostmutu
+previous:
+  other: fuk rapagemu
+next:
+  other: afu rapagemu
+seeAlso:
+  other: tomo
+recent:
+  other: raishik
+onThisPage:
+  other: arek racontentmutu
+editThisPage:
+  other: racontentmue kate
+light:
+  other: Rarightmu
+dark:
+  other: Ararightmu
+auto:
+  other: Ra'automu
+search:
+  other: Rasearchmu...
+AHowManyArts:
+    other: ""
+BHowManyArts:
+    other: racontentmue(racontentmutue) raita.
+  
+
+
