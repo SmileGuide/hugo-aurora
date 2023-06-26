@@ -1,37 +1,37 @@
 readMore:
-  other: Rareadmu makye
+  other: raReadmu makye
 readingTime:
   other: '{{ .Count }}min rareadmuk hanashi'
 toc:
-  other: racomtentmutu
+  other: raComtentmutu
 seriesOfPosts:
-  other: rapostmutu
+  other: raCostmutu
 previous:
-  other: fuk rapagemu
+  other: Fuk raPagemu
 next:
-  other: afu rapagemu
+  other: Afu raPagemu
 seeAlso:
-  other: tomo
+  other: Tomo
 recent:
-  other: raishik
+  other: Raishik
 onThisPage:
-  other: arek racontentmutu
+  other: Arek raContentmutu
 editThisPage:
-  other: racontentmue kate
+  other: raContentmue Kate
 light:
-  other: Rarightmu
+  other: raLightmu
 dark:
   other: Ararightmu
 auto:
-  other: Ra'automu
+  other: ra'Automu
 search:
-  other: Rasearchmu...
+  other: raSearchmu...
 AHowManyArts:
     other: ""
 BHowManyArts:
-    other: racontentmue(racontentmutue) raita.
-commentarea:
-    other: Amapa Pomo
+    other: raContentmue(racontentmutue) raita.
+commentArea:
+    other: Amapa Pomo：
   
 
 
